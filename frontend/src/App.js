@@ -101,10 +101,44 @@ function App() {
 
   const copyToClipboard = async (text) => {
     try {
-      await navigator.clipboard.writeText(text);
-      toast.success("Copied to clipboard!");
+      // First try the modern clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        toast.success("Copied to clipboard!");
+        return;
+      }
+      
+      // Fallback method for older browsers or non-secure contexts
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        toast.success("Copied to clipboard!");
+      } else {
+        throw new Error('Copy command failed');
+      }
     } catch (error) {
-      toast.error("Failed to copy to clipboard");
+      console.error('Copy failed:', error);
+      
+      // Last resort: show the text in a prompt for manual copying
+      const shouldShowText = window.confirm(
+        "Automatic copying failed. Would you like to see the text to copy manually?"
+      );
+      
+      if (shouldShowText) {
+        window.prompt("Copy this text manually:", text);
+      } else {
+        toast.error("Failed to copy to clipboard. Please try selecting and copying the text manually.");
+      }
     }
   };
 
