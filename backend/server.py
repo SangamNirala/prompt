@@ -159,7 +159,7 @@ ENHANCEMENT_PROMPTS = {
     """
 }
 
-async def enhance_prompt_with_gemini(original_prompt: str, style: str) -> dict:
+def enhance_prompt_with_gemini(original_prompt: str, style: str) -> dict:
     """Enhanced prompt using Gemini API"""
     try:
         model = genai.GenerativeModel('gemini-2.0-flash-exp')
