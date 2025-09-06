@@ -240,7 +240,7 @@ async def enhance_prompt(request: PromptEnhanceRequest):
     
     try:
         # Enhance the prompt using Gemini
-        enhancement_result = await enhance_prompt_with_gemini(
+        enhancement_result = enhance_prompt_with_gemini(
             request.original_prompt, 
             request.enhancement_style
         )
