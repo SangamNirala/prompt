@@ -281,17 +281,35 @@ function App() {
                         <Textarea
                           value={enhancedPrompt}
                           readOnly
-                          className="min-h-32 bg-gray-800/50 border-gray-600 text-white resize-none text-lg"
+                          className="min-h-32 bg-gray-800/50 border-gray-600 text-white resize-none text-lg pr-24"
                         />
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => copyToClipboard(enhancedPrompt)}
-                          className="absolute top-2 right-2 bg-gray-700/80 hover:bg-gray-600/80 border-gray-600 text-white hover:text-white z-10 backdrop-blur-sm"
-                          title="Copy to clipboard"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
+                        <div className="absolute top-2 right-2 flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const textarea = document.querySelector('textarea[readonly]');
+                              if (textarea) {
+                                textarea.select();
+                                textarea.setSelectionRange(0, 99999);
+                                toast.success("Text selected! Press Ctrl+C to copy");
+                              }
+                            }}
+                            className="bg-gray-700/80 hover:bg-gray-600/80 border-gray-600 text-white hover:text-white z-10 backdrop-blur-sm"
+                            title="Select all text"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => copyToClipboard(enhancedPrompt)}
+                            className="bg-gray-700/80 hover:bg-gray-600/80 border-gray-600 text-white hover:text-white z-10 backdrop-blur-sm"
+                            title="Copy to clipboard"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       
                       {enhancementReasoning && (
