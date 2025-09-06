@@ -164,35 +164,53 @@ def enhance_prompt_with_gemini(original_prompt: str, style: str) -> dict:
     try:
         model = genai.GenerativeModel('gemini-2.0-flash-exp')
         
-        enhancement_prompt = ENHANCEMENT_PROMPTS.get(style, ENHANCEMENT_PROMPTS["creative"])
-        formatted_prompt = enhancement_prompt.format(original_prompt=original_prompt)
+        # Simplified and more reliable prompting approach
+        enhancement_prompt = f"""
+        Transform this prompt into a much more detailed, creative, and visually compelling version suitable for AI image generation.
         
-        response = model.generate_content(formatted_prompt)
-        response_text = response.text.strip()
+        Style: {style.title()}
+        Original prompt: {original_prompt}
         
-        # Try to parse JSON response
-        try:
-            # Clean the response text
-            if response_text.startswith('```json'):
-                response_text = response_text[7:]
-            if response_text.endswith('```'):
-                response_text = response_text[:-3]
-            
-            result = json.loads(response_text.strip())
-            return {
-                "enhanced_prompt": result.get("enhanced_prompt", original_prompt),
-                "reasoning": result.get("reasoning", "Enhanced with AI creativity")
-            }
-        except json.JSONDecodeError:
-            # Fallback if JSON parsing fails
-            return {
-                "enhanced_prompt": response_text,
-                "reasoning": f"Enhanced using {style} style with AI creativity"
-            }
+        Rules:
+        1. Keep the core concept but make it dramatically more detailed and engaging
+        2. Add specific visual elements, lighting, composition details
+        3. Make it inspiring and creative while staying true to the original idea
+        4. For {style} style: {"Add imaginative and artistic elements" if style == "creative" else 
+                             "Add technical specifications and precise details" if style == "technical" else
+                             "Add artistic references and aesthetic elements" if style == "artistic" else
+                             "Add cinematic and dramatic elements" if style == "cinematic" else
+                             "Add extremely detailed descriptions"}
+        
+        Respond with only the enhanced prompt, nothing else:
+        """
+        
+        response = model.generate_content(enhancement_prompt)
+        enhanced_text = response.text.strip()
+        
+        # Simple validation and cleaning
+        if not enhanced_text or len(enhanced_text) < len(original_prompt):
+            enhanced_text = f"Enhanced {style} version: {original_prompt} with dramatic lighting, rich colors, high detail, professional composition, and artistic flair"
+        
+        return {
+            "enhanced_prompt": enhanced_text,
+            "reasoning": f"Enhanced using {style} style with AI creativity and detailed visual elements"
+        }
             
     except Exception as e:
         logging.error(f"Error enhancing prompt: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Enhancement failed: {str(e)}")
+        # Fallback enhancement
+        fallback_enhancements = {
+            "creative": f"Imaginative and visually stunning: {original_prompt}, with vibrant colors, magical lighting, artistic composition, and creative flair",
+            "technical": f"Highly detailed technical rendering: {original_prompt}, shot with professional camera, perfect lighting, 8K resolution, precise details",
+            "artistic": f"Beautiful artistic interpretation: {original_prompt}, painted in the style of renaissance masters, with perfect composition and aesthetic beauty",
+            "cinematic": f"Dramatic cinematic scene: {original_prompt}, with movie-quality lighting, perfect composition, and emotional depth",
+            "detailed": f"Extremely detailed version: {original_prompt}, with intricate textures, perfect lighting, rich colors, and comprehensive visual elements"
+        }
+        
+        return {
+            "enhanced_prompt": fallback_enhancements.get(style, f"Enhanced version: {original_prompt} with improved visual details and creative elements"),
+            "reasoning": f"Used fallback enhancement due to API error: {str(e)}"
+        }
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
