@@ -339,6 +339,7 @@ function App() {
           </TabsContent>
         </Tabs>
       </div>
+      <Toaster theme="dark" />
     </div>
   );
 }
