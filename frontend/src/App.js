@@ -287,7 +287,8 @@ function App() {
                           size="sm"
                           variant="outline"
                           onClick={() => copyToClipboard(enhancedPrompt)}
-                          className="absolute top-2 right-2 bg-gray-700/50 hover:bg-gray-600/50 border-gray-600"
+                          className="absolute top-2 right-2 bg-gray-700/80 hover:bg-gray-600/80 border-gray-600 text-white hover:text-white z-10 backdrop-blur-sm"
+                          title="Copy to clipboard"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
