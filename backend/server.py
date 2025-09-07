@@ -214,7 +214,6 @@ class VisualAssetEngine:
         except Exception as e:
             logging.error(f"Error generating logo: {str(e)}")
             # For now, return a placeholder to test the rest of the system
-            import base64
             # Create a simple placeholder image in base64
             placeholder_data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
             return placeholder_data
