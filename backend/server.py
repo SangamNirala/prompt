@@ -511,8 +511,24 @@ async def generate_complete_package(project_id: str):
                 await db.generated_assets.insert_one(asset_dict)
                 
             except Exception as asset_error:
-                logging.warning(f"Failed to generate {asset_type}: {str(asset_error)}")
-                continue
+                logging.error(f"Failed to generate {asset_type}: {str(asset_error)}")
+                # Create placeholder asset so the frontend still gets all 6 assets
+                placeholder_image = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+                
+                asset = GeneratedAsset(
+                    project_id=project_id,
+                    asset_type=asset_type,
+                    asset_url=f"data:image/png;base64,{placeholder_image}",
+                    metadata={"context": context, "generated_at": datetime.now(timezone.utc).isoformat(), "error": "generation_failed"}
+                )
+                
+                generated_assets.append(asset)
+                
+                # Store placeholder asset in database
+                asset_dict = asset.dict()
+                asset_dict['created_at'] = asset_dict['created_at'].isoformat()
+                
+                await db.generated_assets.insert_one(asset_dict)
         
         # Update project
         project.generated_assets.extend(generated_assets)
