@@ -228,7 +228,7 @@ class VisualAssetEngine:
             return placeholder_data
     
     async def generate_marketing_asset(self, brand_strategy: BrandStrategy, asset_type: str, additional_context: str = "") -> str:
-        """Generate various marketing assets"""
+        """Generate various marketing assets with retry logic"""
         
         asset_prompts = {
             "business_card": f"Professional business card design for {brand_strategy.business_name}",
@@ -265,31 +265,84 @@ class VisualAssetEngine:
         Create a compelling {asset_type} that represents the brand professionally.
         """
         
+        # Try up to 3 times to generate the asset
+        for attempt in range(3):
+            try:
+                logging.info(f"Attempting to generate {asset_type} (attempt {attempt + 1}/3)")
+                
+                # Use the synchronous version and handle async properly
+                import asyncio
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(None, self.model.generate_content, marketing_prompt)
+                
+                # Try different ways to extract image data
+                if hasattr(response, 'candidates') and response.candidates:
+                    for candidate in response.candidates:
+                        if hasattr(candidate, 'content') and candidate.content:
+                            for part in candidate.content.parts:
+                                if hasattr(part, 'inline_data') and part.inline_data and part.inline_data.data:
+                                    # Convert binary data to base64
+                                    image_binary = part.inline_data.data
+                                    if image_binary:
+                                        image_data = base64.b64encode(image_binary).decode('utf-8')
+                                        logging.info(f"Successfully generated {asset_type} on attempt {attempt + 1}")
+                                        return image_data
+                
+                logging.warning(f"No image data found for {asset_type} on attempt {attempt + 1}")
+                
+                # Wait a bit before retrying
+                if attempt < 2:
+                    await asyncio.sleep(2)
+                    
+            except Exception as e:
+                logging.error(f"Error generating {asset_type} on attempt {attempt + 1}: {str(e)}")
+                if attempt < 2:
+                    await asyncio.sleep(2)
+        
+        # After all attempts failed, generate a better placeholder
+        logging.error(f"Failed to generate {asset_type} after 3 attempts, using enhanced placeholder")
+        
+        # Create a simple branded placeholder using PIL
         try:
-            # Use the synchronous version and handle async properly
-            import asyncio
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(None, self.model.generate_content, marketing_prompt)
+            from PIL import Image, ImageDraw, ImageFont
+            import io
             
-            # Try different ways to extract image data
-            if hasattr(response, 'candidates') and response.candidates:
-                for candidate in response.candidates:
-                    if hasattr(candidate, 'content') and candidate.content:
-                        for part in candidate.content.parts:
-                            if hasattr(part, 'inline_data') and part.inline_data:
-                                # Convert binary data to base64
-                                image_binary = part.inline_data.data
-                                if image_binary:
-                                    image_data = base64.b64encode(image_binary).decode('utf-8')
-                                    return image_data
+            # Create a 512x512 image with brand colors
+            img = Image.new('RGB', (512, 512), color='#f8f9fa')
+            draw = ImageDraw.Draw(img)
             
-            # For now, return a placeholder to test the rest of the system
-            placeholder_data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+            # Use first brand color or default
+            brand_color = brand_strategy.color_palette[0] if brand_strategy.color_palette else '#6366f1'
+            
+            # Draw a simple design
+            draw.rectangle([50, 50, 462, 462], outline=brand_color, width=4)
+            draw.rectangle([100, 100, 412, 412], fill=brand_color, width=2)
+            
+            # Add text
+            try:
+                font = ImageFont.load_default()
+                text = brand_strategy.business_name[:20]  # Limit text length
+                bbox = draw.textbbox((0, 0), text, font=font)
+                text_width = bbox[2] - bbox[0]
+                text_height = bbox[3] - bbox[1]
+                x = (512 - text_width) // 2
+                y = (512 - text_height) // 2
+                draw.text((x, y), text, fill='white', font=font)
+            except:
+                # Fallback if font fails
+                draw.text((200, 250), asset_type.upper(), fill='white')
+            
+            # Convert to base64
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            placeholder_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            
+            logging.info(f"Generated branded placeholder for {asset_type}")
             return placeholder_data
             
-        except Exception as e:
-            logging.error(f"Error generating {asset_type}: {str(e)}")
-            # Return placeholder for testing
+        except Exception as placeholder_error:
+            logging.error(f"Failed to create branded placeholder: {str(placeholder_error)}")
+            # Final fallback - minimal placeholder
             placeholder_data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
             return placeholder_data
 
