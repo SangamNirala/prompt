@@ -284,7 +284,6 @@ class VisualAssetEngine:
                                     return image_data
             
             # For now, return a placeholder to test the rest of the system
-            import base64
             placeholder_data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
             return placeholder_data
             
