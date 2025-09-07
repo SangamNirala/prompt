@@ -433,6 +433,10 @@ async def get_project(project_id: str):
         if not project_data:
             raise HTTPException(status_code=404, detail="Project not found")
         
+        # Convert ObjectId to string for JSON serialization
+        if "_id" in project_data:
+            project_data["_id"] = str(project_data["_id"])
+        
         return project_data
         
     except Exception as e:
