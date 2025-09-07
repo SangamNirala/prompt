@@ -197,13 +197,22 @@ class VisualAssetEngine:
                 for candidate in response.candidates:
                     if hasattr(candidate, 'content') and candidate.content:
                         for part in candidate.content.parts:
-                            if hasattr(part, 'inline_data') and part.inline_data:
-                                # Convert binary data to base64
-                                image_binary = part.inline_data.data
-                                if image_binary:
-                                    image_data = base64.b64encode(image_binary).decode('utf-8')
-                                    logging.info(f"Found image data, binary length: {len(image_binary)}, base64 length: {len(image_data)}")
-                                    return image_data
+                            logging.info(f"Part type: {type(part)}, has inline_data: {hasattr(part, 'inline_data')}")
+                            if hasattr(part, 'inline_data'):
+                                logging.info(f"inline_data exists: {part.inline_data is not None}")
+                                if part.inline_data:
+                                    logging.info(f"inline_data mime_type: {getattr(part.inline_data, 'mime_type', 'NO_MIME_TYPE')}")
+                                    logging.info(f"inline_data has data: {hasattr(part.inline_data, 'data')}")
+                                    # Convert binary data to base64
+                                    image_binary = part.inline_data.data
+                                    if image_binary:
+                                        image_data = base64.b64encode(image_binary).decode('utf-8')
+                                        logging.info(f"SUCCESS: Found image data, binary length: {len(image_binary)}, base64 length: {len(image_data)}")
+                                        return image_data
+                                    else:
+                                        logging.info("inline_data.data is empty")
+                                else:
+                                    logging.info("inline_data is None")
                             elif hasattr(part, 'text'):
                                 logging.info(f"Found text part: {part.text[:100]}...")
             
