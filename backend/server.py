@@ -448,6 +448,12 @@ async def get_projects():
     """Get all projects"""
     try:
         projects = await db.brand_projects.find().to_list(100)
+        
+        # Convert ObjectId to string for JSON serialization
+        for project in projects:
+            if "_id" in project:
+                project["_id"] = str(project["_id"])
+        
         return projects
         
     except Exception as e:
