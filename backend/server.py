@@ -282,7 +282,6 @@ class VisualAssetEngine:
         except Exception as e:
             logging.error(f"Error generating {asset_type}: {str(e)}")
             # Return placeholder for testing
-            import base64
             placeholder_data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
             return placeholder_data
 
