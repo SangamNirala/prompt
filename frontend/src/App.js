@@ -680,6 +680,7 @@ function App() {
           </div>
         </Tabs>
       </main>
+      <Toaster position="top-right" richColors />
     </div>
   );
 }
