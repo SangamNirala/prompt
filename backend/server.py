@@ -152,7 +152,7 @@ class BrandStrategyEngine:
 
 class VisualAssetEngine:
     def __init__(self):
-        self.model = genai.GenerativeModel('gemini-2.5-flash-image-preview')
+        self.model = genai.GenerativeModel('models/gemini-2.5-flash-image-preview')
     
     async def generate_logo(self, brand_strategy: BrandStrategy, style_variant: str = "primary") -> str:
         """Generate logo using Gemini Image Preview"""
