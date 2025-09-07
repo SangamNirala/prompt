@@ -197,9 +197,12 @@ class VisualAssetEngine:
                     if hasattr(candidate, 'content') and candidate.content:
                         for part in candidate.content.parts:
                             if hasattr(part, 'inline_data') and part.inline_data:
-                                image_data = part.inline_data.data
-                                logging.info(f"Found image data, length: {len(image_data) if image_data else 0}")
-                                return image_data
+                                # Convert binary data to base64
+                                image_binary = part.inline_data.data
+                                if image_binary:
+                                    image_data = base64.b64encode(image_binary).decode('utf-8')
+                                    logging.info(f"Found image data, binary length: {len(image_binary)}, base64 length: {len(image_data)}")
+                                    return image_data
                             elif hasattr(part, 'text'):
                                 logging.info(f"Found text part: {part.text[:100]}...")
             
