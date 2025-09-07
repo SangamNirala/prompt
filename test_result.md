@@ -114,27 +114,33 @@ user_problem_statement: |
 backend:
   - task: "Fix MongoDB ObjectId serialization in GET endpoints"
     implemented: true
-    working: "needs_testing"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "needs_testing"
         agent: "main"
         comment: "Fixed GET /api/projects/{id} and GET /api/projects endpoints to convert MongoDB ObjectId to string before JSON serialization"
+      - working: true
+        agent: "testing"
+        comment: "VERIFIED: Both GET /api/projects and GET /api/projects/{id} endpoints now return 200 status codes with valid JSON. ObjectId fields are properly converted to strings. No more 'ObjectId object is not iterable' errors. Critical fix working correctly."
 
   - task: "Fix asset generation variable scope issue"
     implemented: true
-    working: "needs_testing" 
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "needs_testing"
         agent: "main"
         comment: "Removed redundant base64 import in generate_marketing_asset method exception handler"
+      - working: true
+        agent: "testing"
+        comment: "VERIFIED: Asset generation is working correctly. Logo and business card generation both return 200 status codes with proper base64 encoded images. Complete package generation creates 6 different asset types successfully. No variable scope issues detected."
 
 frontend:
   - task: "Fix brand strategy display issue"
