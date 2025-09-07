@@ -268,8 +268,11 @@ class VisualAssetEngine:
                     if hasattr(candidate, 'content') and candidate.content:
                         for part in candidate.content.parts:
                             if hasattr(part, 'inline_data') and part.inline_data:
-                                image_data = part.inline_data.data
-                                return image_data
+                                # Convert binary data to base64
+                                image_binary = part.inline_data.data
+                                if image_binary:
+                                    image_data = base64.b64encode(image_binary).decode('utf-8')
+                                    return image_data
             
             # For now, return a placeholder to test the rest of the system
             import base64
