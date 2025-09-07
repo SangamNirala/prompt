@@ -103,8 +103,8 @@ function App() {
       setProgress(50);
       
       toast.success('Brand strategy generated!');
-      setActiveTab('visual-assets');
-      setCurrentStep(2);
+      // Stay on brand-strategy tab so users can review the generated strategy
+      // Users can manually navigate to visual-assets when ready
     } catch (error) {
       console.error('Error generating brand strategy:', error);
       toast.error('Failed to generate brand strategy. Please try again.');
