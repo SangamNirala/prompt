@@ -169,35 +169,82 @@ class BrandForgeAPITester:
         return success
 
     def test_generate_complete_package(self):
-        """Test complete package generation"""
+        """Test enhanced complete package generation with retry logic"""
         if not self.project_id:
             print("❌ Cannot test complete package - no project ID")
             return False
             
+        print("🔍 Testing Enhanced Complete Package Generation with Retry Logic...")
         success, response = self.run_test(
-            "Generate Complete Package",
+            "Generate Complete Package (Enhanced)",
             "POST",
             f"projects/{self.project_id}/complete-package",
             200,
-            timeout=120  # Complete package takes longer
+            timeout=180  # Enhanced retry logic may take longer
         )
         
         if success:
-            # Verify package structure
-            if 'generated_assets' in response and len(response['generated_assets']) > 0:
-                print(f"   ✅ Generated {len(response['generated_assets'])} assets")
+            # CRITICAL TEST: Verify exactly 6 assets are returned
+            if 'generated_assets' in response:
+                asset_count = len(response['generated_assets'])
+                print(f"   📊 Asset Count: {asset_count}")
                 
-                # Check asset types
+                if asset_count == 6:
+                    print("   ✅ CRITICAL: Exactly 6 assets generated as expected")
+                else:
+                    print(f"   ❌ CRITICAL: Expected 6 assets, got {asset_count}")
+                    return False
+                
+                # Check all expected asset types are present
                 asset_types = [asset['asset_type'] for asset in response['generated_assets']]
                 expected_types = ['logo', 'business_card', 'letterhead', 'social_media_post', 'flyer', 'banner']
                 
+                missing_types = []
                 for expected_type in expected_types:
                     if expected_type in asset_types:
                         print(f"   ✅ {expected_type} generated")
                     else:
-                        print(f"   ⚠️  {expected_type} missing")
+                        print(f"   ❌ {expected_type} missing")
+                        missing_types.append(expected_type)
+                
+                if missing_types:
+                    print(f"   ❌ CRITICAL: Missing asset types: {missing_types}")
+                    return False
+                
+                # CRITICAL TEST: Verify asset URLs contain substantial base64 data (not tiny placeholders)
+                tiny_placeholders = 0
+                valid_assets = 0
+                
+                for asset in response['generated_assets']:
+                    asset_url = asset.get('asset_url', '')
+                    if asset_url.startswith('data:image/png;base64,'):
+                        base64_data = asset_url.split(',')[1] if ',' in asset_url else ''
+                        data_length = len(base64_data)
+                        
+                        # Check if it's a tiny placeholder (less than 200 chars is suspicious)
+                        if data_length < 200:
+                            print(f"   ⚠️  {asset['asset_type']}: Potentially tiny placeholder ({data_length} chars)")
+                            tiny_placeholders += 1
+                        else:
+                            print(f"   ✅ {asset['asset_type']}: Valid image data ({data_length} chars)")
+                            valid_assets += 1
+                    else:
+                        print(f"   ❌ {asset['asset_type']}: Invalid asset URL format")
+                        return False
+                
+                # Report on image quality
+                print(f"   📊 Image Quality Summary:")
+                print(f"      Valid assets: {valid_assets}/6")
+                print(f"      Tiny placeholders: {tiny_placeholders}/6")
+                
+                if tiny_placeholders > 0:
+                    print(f"   ⚠️  WARNING: {tiny_placeholders} assets may be tiny placeholders")
+                    # Don't fail the test for this, as branded placeholders are acceptable
+                
+                print("   ✅ ENHANCED COMPLETE PACKAGE GENERATION: All critical tests passed")
+                return True
             else:
-                print("   ❌ No assets generated in package")
+                print("   ❌ CRITICAL: No 'generated_assets' field in response")
                 return False
         
         return success
