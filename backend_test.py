@@ -68,13 +68,13 @@ class BrandForgeAPITester:
     def test_create_project(self):
         """Test project creation"""
         test_data = {
-            "business_name": "Bean & Earth Coffee",
-            "business_description": "Sustainable coffee roastery sourcing directly from farmers, committed to fair trade and environmental responsibility",
-            "industry": "Food & Beverage",
-            "target_audience": "Environmentally conscious millennials and Gen Z coffee enthusiasts",
-            "business_values": ["sustainability", "fair trade", "quality", "community"],
+            "business_name": "RetryTest Solutions",
+            "business_description": "Testing enhanced retry logic for asset generation",
+            "industry": "Technology",
+            "target_audience": "Test users",
+            "business_values": ["reliability", "quality"],
             "preferred_style": "modern",
-            "preferred_colors": "earth tones"
+            "preferred_colors": "flexible"
         }
         
         success, response = self.run_test(
