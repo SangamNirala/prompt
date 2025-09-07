@@ -175,12 +175,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix MongoDB ObjectId serialization in GET endpoints"
     - "Fix brand strategy display issue"
-    - "Fix asset generation variable scope issue"
     - "Fix UI state management and tab navigation"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
